@@ -3,9 +3,11 @@
 
 #include "PlayerControllerInputComponent.h"
 #include "Framework/Commands/InputChord.h"
+#include "Flight/PlayerManagers/PrimaryPlayerController.h"
 #include "GameFramework/InputSettings.h"
 
 UPlayerControllerInputComponent::UPlayerControllerInputComponent() :
+	ParentPlayerController(nullptr),
 	ActiveKeymaps({}),
 	ActiveModifiers({})
 {
@@ -14,16 +16,16 @@ UPlayerControllerInputComponent::UPlayerControllerInputComponent() :
 void UPlayerControllerInputComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	this->ParentPlayerController = Cast<APrimaryPlayerController>(UInputComponent::GetOwner());
+
 	this->ClearEngineInputSettings();
 	this->ClearParentInputBindings();
 	this->SetDefaultInputBindings();
 }
 
-void UPlayerControllerInputComponent::LoadKeymap(EInputScheme InputScheme, const TArray<FInputCombination>& Keymap)
+void UPlayerControllerInputComponent::LoadKeymap(EInputScheme InputScheme, const TArray<FInputCombination>* const Keymap)
 {
 	this->ActiveKeymaps.Add(InputScheme, Keymap);
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Green, Keymap[0].Key.GetFName().ToString());
 }
 
 void UPlayerControllerInputComponent::UnloadKeymap(EInputScheme InputScheme)
@@ -70,7 +72,7 @@ void UPlayerControllerInputComponent::KeyPressedHandler(FKey Key)
 
 	for (auto InputScheme : this->ActiveKeymaps)
 	{
-		for (auto InputCombination : InputScheme.Value)
+		for (auto InputCombination : *InputScheme.Value)
 		{
 			if (Key == InputCombination.Key)
 			{

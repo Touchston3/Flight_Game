@@ -7,7 +7,7 @@
 #include "Flight/WorldEntities/CharacterPawn.h"
 #include "PrimaryPlayerController.generated.h"
 
-class UFlightMainMenu;
+class UPlayerControllerMenuComponent;
 
 UCLASS(Blueprintable)
 class FLIGHT_API APrimaryPlayerController : public APlayerController
@@ -18,6 +18,8 @@ public:
 	APrimaryPlayerController();
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+
+
 protected:
 	//IDK I might need these
 	void OnPossess(APawn* aPawn) override;
@@ -28,16 +30,9 @@ protected:
 
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	UPlayerControllerInputComponent* UserInputComponent;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UFlightMainMenu> MainMenuClass;
-	
-	UFlightMainMenu* MainMenu;
-
-	TMap<EInputScheme, TArray<FInputCombination>> TmpAllKeymaps;
-	//UserSettingsComponent
-
+	UPROPERTY(EditDefaultsOnly)
+	UPlayerControllerMenuComponent* MainMenuComponent;
 };
-//This will need to know all possible keybindings so the player can set them up in the UI. This means we should have the 

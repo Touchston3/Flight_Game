@@ -7,6 +7,7 @@
 #include "Flight/WorldEntities/CharacterPawn.h"
 #include "PlayerControllerInputComponent.generated.h"
 
+class APrimaryPlayerController;
 #define MAX_ACTIVE_MODIFIERS 3
 
 USTRUCT()
@@ -42,7 +43,7 @@ public:
 	UPlayerControllerInputComponent();
 
 	void BeginPlay() override;
-	void LoadKeymap(EInputScheme InputScheme, const TArray<FInputCombination>& Keymap);
+	void LoadKeymap(EInputScheme InputScheme, const TArray<FInputCombination>* const Keymap);
 	void UnloadKeymap(EInputScheme InputScheme);
 private:
 	void ClearEngineInputSettings();
@@ -52,8 +53,9 @@ private:
 	void KeyPressedHandler(FKey Key);
 	void KeyReleasedHandler(FKey Key);
 private:
+	APrimaryPlayerController* ParentPlayerController;
 
-	TMap<EInputScheme, TArray<FInputCombination>> ActiveKeymaps;
+	TMap<EInputScheme, const TArray<FInputCombination>*> ActiveKeymaps;
 	TArray<FKey> ActiveModifiers;
 
 };
