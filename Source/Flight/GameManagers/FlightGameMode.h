@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "Flight/WorldEntities/CharacterPawn.h"
+#include "Flight/WorldEntities/Character/FlightCharacterPawn.h"
 #include "FlightGameMode.generated.h"
 
 /**
@@ -21,6 +21,6 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<ACharacterPawn> DefaultPawnClassProperty;
+	TSubclassOf<AFlightCharacterPawn> DefaultPawnClassProperty;
 
 };

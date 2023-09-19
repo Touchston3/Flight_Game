@@ -4,7 +4,7 @@
 #include "FlightGameInstance.h"
 #include "Engine/World.h"
 #include "GeneralEngineSettings.h"
-#include "Flight/FlightWorldSettings.h"
+#include "..\FlightWorldSettings.h"
 
 UFlightGameInstance::UFlightGameInstance() :
 	WorldSettings(CreateDefaultSubobject<AFlightWorldSettings>(TEXT("DefaultWorldSettings")))

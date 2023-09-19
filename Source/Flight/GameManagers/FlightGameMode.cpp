@@ -4,7 +4,7 @@
 #include "FlightGameMode.h"
 
 AFlightGameMode::AFlightGameMode() :
-	DefaultPawnClassProperty(ACharacterPawn::StaticClass())
+	DefaultPawnClassProperty(AFlightCharacterPawn::StaticClass())
 {
 }
 

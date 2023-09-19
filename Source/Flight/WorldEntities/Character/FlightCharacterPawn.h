@@ -4,11 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Camera/CameraComponent.h"
-#include "CharacterPawn.generated.h"
+#include "FlightCharacterPawn.generated.h"
 
-class AAircraft;
-class UPlayerControllerInputComponent;
+class UFlightCharacterPawnMovement;
 
 UENUM() //This should be moved elsewhere
 enum class EInputScheme : uint8
@@ -17,13 +15,13 @@ enum class EInputScheme : uint8
 };
 
 UCLASS(Blueprintable)
-class FLIGHT_API ACharacterPawn : public APawn
+class FLIGHT_API AFlightCharacterPawn : public APawn
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this pawn's properties
-	ACharacterPawn();
+	AFlightCharacterPawn();
 
 	UPROPERTY(EditAnywhere)
 	EInputScheme InputScheme;
@@ -36,12 +34,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	UPROPERTY(EditAnywhere)
-	USkeletalMeshComponent* SkeletalMesh;
-
 	UPROPERTY(EditDefaultsOnly)
-	UCameraComponent* CameraComponent;
+	UFlightCharacterPawnMovement* MovementComp;
 };
+
 /* Required stuff
 	-Input component
 	-Skeletal Mesh Component

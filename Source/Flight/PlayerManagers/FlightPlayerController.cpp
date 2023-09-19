@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PrimaryPlayerController.h"
+#include "FlightPlayerController.h"
+#include "FlightMenuComp.h"
 #include "Engine/InputDelegateBinding.h"
-#include "Flight/PlayerManagers/PlayerControllerMenuComponent.h"
 
-APrimaryPlayerController::APrimaryPlayerController() :
-	UserInputComponent(CreateDefaultSubobject<UPlayerControllerInputComponent>(TEXT("UserInputComponent"))),
-	MainMenuComponent(CreateDefaultSubobject<UPlayerControllerMenuComponent>(TEXT("MainMenuComponent")))
+AFlightPlayerController::AFlightPlayerController() :
+	UserInputComponent(CreateDefaultSubobject<UFlightInputComp>(TEXT("UserInputComponent"))),
+	MainMenuComponent(CreateDefaultSubobject<UFlightMenuComp>(TEXT("MainMenuComponent")))
 {
 	//I HATE ALL OF THIS CRAP!!!!!!!! InputComponent holds the reference to the actual InputComponent being used. Cannot access from UserInputComponent. Need to learn why. 
 	APlayerController::InputComponent = this->UserInputComponent; 
@@ -18,42 +18,43 @@ APrimaryPlayerController::APrimaryPlayerController() :
 	}
 }
 
-void APrimaryPlayerController::BeginPlay()
+void AFlightPlayerController::BeginPlay()
 {
 	APlayerController::BeginPlay();
 }
 
 //Called in random init function in PlayerController. I am sorta taking over handling.
 //I am just going to register the input component. I am going to handle keybinding in the component itself and actual movement in a pawn's movement component
-void APrimaryPlayerController::SetupInputComponent()
+void AFlightPlayerController::SetupInputComponent()
 {
 }
 
-void APrimaryPlayerController::OnPossess(APawn* aPawn)
+void AFlightPlayerController::OnPossess(APawn* aPawn)
 {
 	APlayerController::OnPossess(aPawn);
-	if (ACharacterPawn* CastedPawn = Cast<ACharacterPawn>(APlayerController::GetPawn())) //Why tf does .isA() not work in this case?
+	if (AFlightCharacterPawn* CastedPawn = Cast<AFlightCharacterPawn>(APlayerController::GetPawn())) //Why tf does .isA() not work in this case?
 	{
 		//This breaks if the characters input scheme doesn't exist in the settings map. 
-		Cast<UPlayerControllerInputComponent>(this->InputComponent)->LoadKeymap(CastedPawn->InputScheme, this->MainMenuComponent->GetInputScheme(CastedPawn->InputScheme));
+		Cast<UFlightInputComp>(this->InputComponent)->LoadKeymap(CastedPawn->InputScheme, this->MainMenuComponent->GetInputScheme(CastedPawn->InputScheme));
+		Cast<UFlightInputComp>(this->InputComponent)->TmpSetupDelegates();
 	}
 }
 
-void APrimaryPlayerController::OnUnPossess()
+void AFlightPlayerController::OnUnPossess()
 {
-	if (ACharacterPawn* CastedPawn = Cast<ACharacterPawn>(APlayerController::GetPawn())) 
+	if (AFlightCharacterPawn* CastedPawn = Cast<AFlightCharacterPawn>(APlayerController::GetPawn())) 
 	{
-		Cast<UPlayerControllerInputComponent>(this->InputComponent)->UnloadKeymap(Cast<ACharacterPawn>(this->GetPawn())->InputScheme);
+		Cast<UFlightInputComp>(this->InputComponent)->UnloadKeymap(Cast<AFlightCharacterPawn>(this->GetPawn())->InputScheme);
 	}
 	Super::OnUnPossess();
 }
 
-void APrimaryPlayerController::AttachToPawn(APawn* InPawn)
+void AFlightPlayerController::AttachToPawn(APawn* InPawn)
 {
 	Super::AttachToPawn(InPawn);
 }
 
-void APrimaryPlayerController::DetachFromPawn()
+void AFlightPlayerController::DetachFromPawn()
 {
 	Super::DetachFromPawn();
 }

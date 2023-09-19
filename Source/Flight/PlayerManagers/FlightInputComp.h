@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/InputComponent.h"
-#include "Flight/WorldEntities/CharacterPawn.h"
-#include "PlayerControllerInputComponent.generated.h"
+#include "Flight/WorldEntities/Character/FlightCharacterPawn.h"
+#include "FlightInputComp.generated.h"
 
-class APrimaryPlayerController;
 #define MAX_ACTIVE_MODIFIERS 3
+
+class AFlightPlayerController;
 
 USTRUCT()
 struct FInputCombination
@@ -19,7 +20,7 @@ struct FInputCombination
 	TStaticArray<FKey, MAX_ACTIVE_MODIFIERS> Modifiers;
 	FString ActionName;
 
-	inline bool operator==(FInputCombination& OtherKey)
+	bool operator==(FInputCombination& OtherKey)
 	{
 		if (this->Key != OtherKey.Key)
 			return false;
@@ -35,16 +36,24 @@ struct FInputCombination
 	//Does the other key have a subset of the chord of this Combination
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTestDelegate, FKey, TestName);
+
 UCLASS(Blueprintable)
-class FLIGHT_API UPlayerControllerInputComponent : public UInputComponent
+class FLIGHT_API UFlightInputComp : public UInputComponent
 {
 	GENERATED_BODY()
 public:
-	UPlayerControllerInputComponent();
+	UFlightInputComp();
 
 	void BeginPlay() override;
 	void LoadKeymap(EInputScheme InputScheme, const TArray<FInputCombination>* const Keymap);
 	void UnloadKeymap(EInputScheme InputScheme);
+	AFlightPlayerController* GetParentController() const;
+	
+	void TmpSetupDelegates();
+	FTestDelegate* const GetDelegateFromAction(FString ActionName);
+//--------------------------------------------------
+	
 private:
 	void ClearEngineInputSettings();
 	void ClearParentInputBindings();
@@ -52,10 +61,13 @@ private:
 
 	void KeyPressedHandler(FKey Key);
 	void KeyReleasedHandler(FKey Key);
-private:
-	APrimaryPlayerController* ParentPlayerController;
 
+//---------------------------------------------------
+
+	TMap<EInputScheme, TArray<FInputCombination>> AllKeymaps;
 	TMap<EInputScheme, const TArray<FInputCombination>*> ActiveKeymaps;
 	TArray<FKey> ActiveModifiers;
 
+	TMap<FString, FTestDelegate> InputDelegates;
+	
 };

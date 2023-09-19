@@ -1,16 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Flight/PlayerManagers/PlayerControllerMenuComponent.h"
-#include "Flight/FlightMainMenu.h"
-#include "Flight/PlayerManagers/PrimaryPlayerController.h"
+#include "FlightMenuComp.h"
+#include "FlightPlayerController.h"
+
 
 // Sets default values for this component's properties
-UPlayerControllerMenuComponent::UPlayerControllerMenuComponent() :
-	ParentPlayerController(nullptr),
-	MainMenuClass(TSubclassOf<UFlightMainMenu>()),
-	MainMenu(nullptr),
-	InputSettingsMenuClass(TSubclassOf<UFlightMainMenu>()),
+UFlightMenuComp::UFlightMenuComp() :
+	MainMenuRootClass(UFlightMenuRoot::StaticClass()),
+	MainMenuRoot(CreateDefaultSubobject<UFlightMenuRoot>(TEXT("Temp Root"))),
 	Keymap({})
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -18,29 +16,27 @@ UPlayerControllerMenuComponent::UPlayerControllerMenuComponent() :
 }
 
 
-TArray<FInputCombination>* const UPlayerControllerMenuComponent::GetInputScheme(EInputScheme Scheme)
+TArray<FInputCombination>* const UFlightMenuComp::GetInputScheme(EInputScheme Scheme)
 {
 	return this->Keymap.Find(Scheme);
 }
 
+
 // Called when the game starts
-void UPlayerControllerMenuComponent::BeginPlay()
+void UFlightMenuComp::BeginPlay()
 {
 	UActorComponent::BeginPlay();
 
+	this->MainMenuRoot = TStrongObjectPtr(CreateWidget<UFlightMenuRoot>(this->GetParentController(), MainMenuRootClass));
+	this->MainMenuRoot->Init(this);
 
-	this->ParentPlayerController = Cast<APrimaryPlayerController>(UActorComponent::GetOwner());
-	this->MainMenu = CreateWidget<UFlightMainMenu>(this->ParentPlayerController, MainMenuClass);
-
-	this->MainMenu->AddToViewport();
-	this->ParentPlayerController->SetShowMouseCursor(true);
-	
+	this->MainMenuRoot->AddToViewport();
+	this->GetParentController()->SetShowMouseCursor(true);
 }
 
-void UPlayerControllerMenuComponent::LoadKeybindings()
+void UFlightMenuComp::LoadKeybindings()
 {
 	//I am going to want to load saved keybindings from a file 
-
 	FInputCombination ForwardInput;
 	ForwardInput.Key = EKeys::W;
 	ForwardInput.ActionName = TEXT("Forward");

@@ -11,5 +11,6 @@ public class FlightTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V2;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_1;
 		ExtraModuleNames.Add("Flight");
+		WindowsPlatform.PCHMemoryAllocationFactor = 2000;
 	}
 }
