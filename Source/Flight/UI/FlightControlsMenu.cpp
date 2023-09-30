@@ -3,50 +3,75 @@
 
 #include "FlightControlsMenu.h"
 
+#include "EnhancedInputSubsystems.h"
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "PlayerMappableInputConfig.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+#include "Flight/PlayerManagers/FlightPlayerController.h"
 #include "Flight/PlayerManagers/FlightMenuComp.h"
 
-UFlightControlsMenuListObject::UFlightControlsMenuListObject() :
-	InputCombination({})	
-{
-}
+
 
 void UFlightControlsMenuListEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	IUserObjectListEntry::NativeOnListItemObjectSet(ListItemObject);
-	this->InputCombination = Cast<UFlightControlsMenuListObject>(ListItemObject)->InputCombination;
+	this->KeyMapping = Cast<UFlightControlsMenuListObject>(ListItemObject)->InputCombination;
 	this->Init();
 }
 
+TWeakObjectPtr<AFlightPlayerController> UFlightControlsMenuListEntry::GetPlayerController() const
+{
+	return Cast<AFlightPlayerController>(UUserWidget::GetOwningPlayer());
+}
+
+UFlightControlsMenuListObject::UFlightControlsMenuListObject()
+{
+}
+
 UFlightControlsMenuListEntry::UFlightControlsMenuListEntry(const FObjectInitializer& Initializer) :
-	UUserWidget(Initializer),
-	InputCombination({})	
+	UUserWidget(Initializer)
 {
 }
 
 void UFlightControlsMenuListEntry::Init()
 {
-	this->ActionText->SetText(FText::FromString(this->InputCombination.ActionName));
-	this->InputText->SetText(FText::FromString
-	(
-		this->InputCombination.Modifiers[0].ToString() +
-		TEXT(" + ") +	
-		this->InputCombination.Modifiers[1].ToString() +
-		TEXT(" + ") +	
-		this->InputCombination.Modifiers[2].ToString() +
-		TEXT(" + ") +	
-		this->InputCombination.Key.ToString()
-	));
-
-	this->RemapButton->OnClicked.AddDynamic(this, &UFlightControlsMenuListEntry::RemapButtonClicked);
+	this->ActionText->SetText(FText::FromString(KeyMapping.Action.GetName()));
+	this->InputKeySelector->SetSelectedKey(this->KeyMapping.Key);
+	this->ResetButton->OnClicked.AddDynamic(this, &UFlightControlsMenuListEntry::HandleResetButtonClicked);
+	this->InputKeySelector->OnKeySelected.AddDynamic(this, &UFlightControlsMenuListEntry::HandleKeySelected);
 }
 
-void UFlightControlsMenuListEntry::RemapButtonClicked()
+void UFlightControlsMenuListEntry::HandleResetButtonClicked()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Handle Remapping"));
+	if(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetPlayerController()->GetLocalPlayer())) //These variable name lengths are getting outta hand
+	{
+		for(auto DefaultKeyMapping : this->GetPlayerController()->PlayerInputComponent->DefaultInputConfig->GetPlayerMappableKeys())
+		{
+			if(DefaultKeyMapping.Action == this->KeyMapping.Action)
+			{
+				this->KeyMapping = DefaultKeyMapping;			
+			}
+		}
+		EnhancedInputSubsystem->AddPlayerMappedKeyInSlot(this->KeyMapping.GetMappingName(), this->KeyMapping.Key);
+		this->InputKeySelector->SetSelectedKey(this->KeyMapping.Key);
+		this->GetPlayerController()->PlayerInputComponent->ActiveInputConfig->ReloadConfig();
+	}
 }
+
+void UFlightControlsMenuListEntry::HandleKeySelected(FInputChord InputChord)
+{
+	if(UEnhancedInputLocalPlayerSubsystem* EnhancedInputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetPlayerController()->GetLocalPlayer())) //These variable name lengths are getting outta hand
+	{
+		EnhancedInputSubsystem->AddPlayerMappedKeyInSlot(this->KeyMapping.GetMappingName(), InputChord.Key);
+		this->KeyMapping.Key = InputChord.Key;
+		this->GetPlayerController()->PlayerInputComponent->ActiveInputConfig->ReloadConfig();
+	}
+	
+}
+
 
 UFlightControlsMenu::UFlightControlsMenu(const FObjectInitializer& Initializer) :
 	UUserWidget(Initializer),
@@ -55,20 +80,23 @@ UFlightControlsMenu::UFlightControlsMenu(const FObjectInitializer& Initializer) 
 }
 
 
-void UFlightControlsMenu::Init(TWeakObjectPtr<UFlightMenuRoot> rootWidget, TWeakObjectPtr<UFlightMenuComp> parentComponent)
+void UFlightControlsMenu::Init(TWeakObjectPtr<UFlightMenuRoot> rootWidget)
 {
 	this->RootWidget = rootWidget;
-	this->ParentComponent = parentComponent;
-	
 	if(this->CharacterBindingsList->GetDefaultEntryClass() != UFlightControlsMenuListEntry::StaticClass()) 
 	{
 		this->CharacterBindingsList->GetDefaultEntryClass() = UFlightControlsMenuListEntry::StaticClass();
 	}
 	//Do for each Input Scheme
-	for(const FInputCombination entry : *this->ParentComponent->GetInputScheme(EInputScheme::Character))
+	for(const FEnhancedActionKeyMapping entry : this->GetPlayerController()->PlayerInputComponent->ActiveInputConfig->GetPlayerMappableKeys())
 	{
 		UFlightControlsMenuListObject* ListItem = NewObject<UFlightControlsMenuListObject>();
 		ListItem->InputCombination = entry;
 		this->CharacterBindingsList->AddItem(ListItem);
 	}
+}
+
+TWeakObjectPtr<AFlightPlayerController> UFlightControlsMenu::GetPlayerController() const
+{
+	return Cast<AFlightPlayerController>(UUserWidget::GetOwningPlayer());
 }

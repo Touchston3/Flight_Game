@@ -3,13 +3,11 @@
 
 #include "FlightGameInstance.h"
 #include "Engine/World.h"
-#include "GeneralEngineSettings.h"
-#include "..\FlightWorldSettings.h"
+#include "Flight/FlightWorldSettings.h"
 
 UFlightGameInstance::UFlightGameInstance() :
 	WorldSettings(CreateDefaultSubobject<AFlightWorldSettings>(TEXT("DefaultWorldSettings")))
 {
-	
 }
 
 void UFlightGameInstance::Init()

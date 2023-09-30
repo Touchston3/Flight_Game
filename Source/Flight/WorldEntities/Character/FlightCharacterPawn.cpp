@@ -2,31 +2,40 @@
 
 
 #include "FlightCharacterPawn.h"
-#include "FlightCharacterPawnMovement.h"
+#include "FlightCharacterInput.h"
+#include "FlightCharacterMovement.h"
+#include "Flight/PlayerManagers/FlightPlayerController.h"
 
 
 // Sets default values
 AFlightCharacterPawn::AFlightCharacterPawn() :
-	InputScheme(EInputScheme::Character),
-	MovementComp(CreateDefaultSubobject<UFlightCharacterPawnMovement>(TEXT("Movement_Component")))
+	Input(CreateDefaultSubobject<UFlightCharacterInput>(TEXT("InputComp"))),
+	Movement(CreateDefaultSubobject<UFlightCharacterMovement>(TEXT("MovementComp")))
 
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-
+	this->Input->RegisterComponent();
+	this->Movement->RegisterComponent();
 }
 
-// Called when the game starts or when spawned
-void AFlightCharacterPawn::BeginPlay()
+void AFlightCharacterPawn::PossessedBy(AController* NewController)
 {
-	Super::BeginPlay();
+	if(AFlightPlayerController* FlightPlayerController = Cast<AFlightPlayerController>(NewController))
+	{
+		this->Input->SetupOnControlled(FlightPlayerController);
+	}
+	APawn::PossessedBy(NewController);
 }
 
-
-// Called every frame
-void AFlightCharacterPawn::Tick(float DeltaTime)
+TWeakObjectPtr<UFlightCharacterInput> AFlightCharacterPawn::GetInput() const
 {
-	Super::Tick(DeltaTime);
+	return this->Input;
 }
+
+TWeakObjectPtr<UFlightCharacterMovement> AFlightCharacterPawn::GetMovement() const
+{
+	return this->Movement;
+}
+
 
 

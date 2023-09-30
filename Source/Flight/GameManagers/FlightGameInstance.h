@@ -31,9 +31,10 @@ public:
 
 protected:
 	void OnStart() override; //Called after the OnStartGameInstance delegate is broadcasted
-private:
-	UPROPERTY(EditAnywhere)
+	
+	UPROPERTY(EditDefaultsOnly)
 	AFlightWorldSettings* WorldSettings;
+private:
 
 	UPROPERTY(VisibleDefaultsOnly)
 	UWorld* DefaultWorld;

@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FlightInputComp.h"
 #include "FlightPlayerController.generated.h"
 
 
 class UFlightMenuComp;
+class UFlightInputComp;
 
 UCLASS(Blueprintable)
 class FLIGHT_API AFlightPlayerController : public APlayerController
@@ -16,20 +16,18 @@ class FLIGHT_API AFlightPlayerController : public APlayerController
 	
 public:
 	AFlightPlayerController();
-	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 
-	UPROPERTY(EditDefaultsOnly)
-	UFlightInputComp* UserInputComponent;
 
 	UPROPERTY(EditDefaultsOnly)
 	UFlightMenuComp* MainMenuComponent;
+	UPROPERTY(EditDefaultsOnly)
+	UFlightInputComp* PlayerInputComponent;
+
 protected:
 	//IDK I might need these
 	void OnPossess(APawn* aPawn) override;
 	void OnUnPossess() override;
-	void AttachToPawn(APawn* InPawn) override;
-	void DetachFromPawn() override;
 
 
 

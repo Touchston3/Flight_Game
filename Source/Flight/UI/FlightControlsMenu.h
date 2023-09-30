@@ -3,9 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EnhancedActionKeyMapping.h"
 #include "Blueprint/UserWidget.h"
-#include "Flight/PlayerManagers/FlightInputComp.h"
 #include "Blueprint/IUserObjectListEntry.h"
+#include "Components/InputKeySelector.h"
 #include "FlightControlsMenu.generated.h"
 
 class UFlightMenuRoot;
@@ -13,6 +14,10 @@ class UListView;
 class UFlightMenuComp;
 class UTextBlock;
 class UButton;
+class AFlightPlayerController;
+class UInputMappingContext;
+class UInputAction;
+
 UCLASS(NotBlueprintable)
 class FLIGHT_API UFlightControlsMenuListObject : public UObject
 {
@@ -20,7 +25,7 @@ class FLIGHT_API UFlightControlsMenuListObject : public UObject
 
 public:
 	UFlightControlsMenuListObject();
-	FInputCombination InputCombination;
+	FEnhancedActionKeyMapping InputCombination;
 };
 
 UCLASS(Blueprintable)
@@ -35,18 +40,22 @@ protected:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 private:
 	
-	FInputCombination InputCombination;
+	TWeakObjectPtr<AFlightPlayerController> GetPlayerController() const;
+	FEnhancedActionKeyMapping KeyMapping;
 	
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
 	UTextBlock* ActionText;
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	UTextBlock* InputText;
+	UButton* ResetButton;
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
-	UButton* RemapButton;
+	UInputKeySelector* InputKeySelector;
+	
 
 
 	UFUNCTION()
-	void RemapButtonClicked();
+	void HandleResetButtonClicked();
+	UFUNCTION()
+	void HandleKeySelected(FInputChord InputChord);
 };
 
 UCLASS(Blueprintable)
@@ -56,10 +65,10 @@ class FLIGHT_API UFlightControlsMenu : public UUserWidget
 
 public:
 	UFlightControlsMenu(const FObjectInitializer& Initializer);
-	void Init(TWeakObjectPtr<UFlightMenuRoot> rootWidget, TWeakObjectPtr<UFlightMenuComp> parentComponent);
+	void Init(TWeakObjectPtr<UFlightMenuRoot> rootWidget);
 private:
 	TWeakObjectPtr<UFlightMenuRoot> RootWidget;
-	TWeakObjectPtr<UFlightMenuComp> ParentComponent;
+	TWeakObjectPtr<AFlightPlayerController> GetPlayerController() const;
 	
 	UPROPERTY(EditDefaultsOnly, meta=(BindWidget))
 	UListView* CharacterBindingsList;

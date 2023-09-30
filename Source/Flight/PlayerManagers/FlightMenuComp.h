@@ -21,7 +21,6 @@ class FLIGHT_API UFlightMenuComp : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UFlightMenuComp();
-	TArray<FInputCombination>* const GetInputScheme(EInputScheme Scheme);
 
 	FORCEINLINE AFlightPlayerController* GetParentController() const { return Cast<AFlightPlayerController>(UActorComponent::GetOwner()); } 
 protected:
@@ -29,13 +28,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	void LoadKeybindings();
-
-private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UFlightMenuRoot> MainMenuRootClass;
 	TStrongObjectPtr<UFlightMenuRoot> MainMenuRoot;
-
-
-	TMap<EInputScheme, TArray<FInputCombination>> Keymap;
 };

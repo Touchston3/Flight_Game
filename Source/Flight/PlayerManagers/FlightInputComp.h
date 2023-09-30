@@ -4,56 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Components/InputComponent.h"
-#include "Flight/WorldEntities/Character/FlightCharacterPawn.h"
+#include "EnhancedInputComponent.h"
 #include "FlightInputComp.generated.h"
 
 #define MAX_ACTIVE_MODIFIERS 3
 
 class AFlightPlayerController;
+class UInputMappingContext;
+class UPlayerMappableInputConfig;
 
-USTRUCT()
-struct FInputCombination
-{
-	GENERATED_BODY()
 
-	FKey Key;
-	TStaticArray<FKey, MAX_ACTIVE_MODIFIERS> Modifiers;
-	FString ActionName;
-
-	bool operator==(FInputCombination& OtherKey)
-	{
-		if (this->Key != OtherKey.Key)
-			return false;
-		for (UINT i = 0; i < MAX_ACTIVE_MODIFIERS; i++)
-		{
-			if (this->Modifiers[i] != OtherKey.Modifiers[i])
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	//Does the other key have a subset of the chord of this Combination
-};
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTestDelegate, FKey, TestName);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFlightInputActionDelegate, FKey, Key);
 
 UCLASS(Blueprintable)
-class FLIGHT_API UFlightInputComp : public UInputComponent
+class FLIGHT_API UFlightInputComp : public UEnhancedInputComponent
 {
 	GENERATED_BODY()
+
 public:
 	UFlightInputComp();
 
-	void BeginPlay() override;
-	void LoadKeymap(EInputScheme InputScheme, const TArray<FInputCombination>* const Keymap);
-	void UnloadKeymap(EInputScheme InputScheme);
+	//void LoadKeymap(EInputScheme InputScheme, const TArray<FInputActionKeyMapping>* const Keymap);
+	//void UnloadKeymap(EInputScheme InputScheme);
 	AFlightPlayerController* GetParentController() const;
+	virtual void OnComponentCreated() override;
 	
-	void TmpSetupDelegates();
-	FTestDelegate* const GetDelegateFromAction(FString ActionName);
+
 //--------------------------------------------------
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPlayerMappableInputConfig* ActiveInputConfig;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPlayerMappableInputConfig* DefaultInputConfig;
+
 private:
 	void ClearEngineInputSettings();
 	void ClearParentInputBindings();
@@ -64,10 +47,6 @@ private:
 
 //---------------------------------------------------
 
-	TMap<EInputScheme, TArray<FInputCombination>> AllKeymaps;
-	TMap<EInputScheme, const TArray<FInputCombination>*> ActiveKeymaps;
-	TArray<FKey> ActiveModifiers;
-
-	TMap<FString, FTestDelegate> InputDelegates;
+	
 	
 };

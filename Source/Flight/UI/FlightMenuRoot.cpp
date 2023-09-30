@@ -20,5 +20,5 @@ UFlightMenuRoot::UFlightMenuRoot(const FObjectInitializer& Initializer) :
 void UFlightMenuRoot::Init(TWeakObjectPtr<UFlightMenuComp> MenuComponent)
 {
 	this->MainMenu->Init(this, MenuComponent);
-	this->ControlsMenu->Init(this, MenuComponent);
+	this->ControlsMenu->Init(this);
 }

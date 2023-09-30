@@ -6,7 +6,8 @@
 #include "GameFramework/Pawn.h"
 #include "FlightCharacterPawn.generated.h"
 
-class UFlightCharacterPawnMovement;
+class UFlightCharacterInput;
+class UFlightCharacterMovement;
 
 UENUM() //This should be moved elsewhere
 enum class EInputScheme : uint8
@@ -18,34 +19,18 @@ UCLASS(Blueprintable)
 class FLIGHT_API AFlightCharacterPawn : public APawn
 {
 	GENERATED_BODY()
-
+	
 public:
-	// Sets default values for this pawn's properties
 	AFlightCharacterPawn();
-
-	UPROPERTY(EditAnywhere)
-	EInputScheme InputScheme;
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	
+	virtual void PossessedBy(AController* NewController) override;
+	TWeakObjectPtr<UFlightCharacterInput> GetInput() const; 
+	TWeakObjectPtr<UFlightCharacterMovement> GetMovement() const;
+	
 private:
 	UPROPERTY(EditDefaultsOnly)
-	UFlightCharacterPawnMovement* MovementComp;
+	UFlightCharacterInput* Input;
+	UPROPERTY(EditDefaultsOnly)
+	UFlightCharacterMovement* Movement; 
 };
 
-/* Required stuff
-	-Input component
-	-Skeletal Mesh Component
-	-Collision Component
-	-Camera Component
-	-Line trace interaction component
-
-	-Ability to pilot vehicle - attach self as actor component to vehicle. Forward input to vehicle. 
-
-
-*/
